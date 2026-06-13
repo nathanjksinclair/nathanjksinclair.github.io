@@ -516,7 +516,7 @@
                         'Accept': 'application/vnd.github+json',
                         'X-GitHub-Api-Version': '2026-03-10',
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        'Authorization': 'Basic ' + btoa(clientId + ':' + accessToken)
+                        'Authorization': `Bearer ${accessToken}`
                     }
                 })
 
