@@ -339,13 +339,15 @@
         // Load items from GitHub Gist
         async function loadItems() {
 
+            loadingAuth.style.display = 'block';
+
             try {
 
                 await fetch('https://nathanjksinclair.github.io/db.json').then(response => {
                     if (!response.ok) {
                         throw new Error("Http error"+ response.status)
                     }
-                    return response.json
+                    return response.json()
                 }).then(json=> {
                     console.log(json);
 
