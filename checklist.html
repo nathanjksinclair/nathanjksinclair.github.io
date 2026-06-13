@@ -263,6 +263,7 @@
             const params = new URLSearchParams(window.location.search);
             console.log('OAuth params:',params);
             const token = params.get('code');
+            console.log('OAuth token:', token);
 
             if (token) {
                 accessToken = token;
