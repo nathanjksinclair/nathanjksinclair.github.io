@@ -515,6 +515,7 @@
                 const userResponse = await fetch('https://api.github.com/user', {
                     headers: {
                         'Authorization': `Bearer ${accessToken}`,
+                        'X-GitHub-Api-Version': '2026-03-10',
                         'Accept': 'application/vnd.github+json'
                     }
                 });
@@ -525,6 +526,7 @@
                 const gistsResponse = await fetch('https://api.github.com/gists', {
                     headers: {
                         'Authorization': `Bearer ${accessToken}`,
+                        'X-GitHub-Api-Version': '2026-03-10',
                         'Accept': 'application/vnd.github+json'
                     }
                 });
