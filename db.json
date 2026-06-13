@@ -1,9 +1,9 @@
 {
-    "tasks": {
-        "tada": {
+    "tasks": [
+        {
             "name": "Add a checklist to my web page",
             "enabled": false
         }
-    }
+    ]
 
 }

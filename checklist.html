@@ -221,6 +221,8 @@
     </div>
 
     <script>
+
+        var items = null;
         
         const authSection = document.getElementById('auth-section');
         
@@ -261,10 +263,10 @@
 
             items.forEach((item, index) => {
                 const itemDiv = document.createElement('div');
-                itemDiv.className = `checklist-item ${item.completed ? 'completed' : ''}`;
+                itemDiv.className = `checklist-item ${item.enabled ? 'enabled' : ''}`;
                 itemDiv.innerHTML = `
-                    <input type="checkbox" class="form-check-input" ${item.completed ? 'checked' : ''} data-index="${index}">
-                    <span class="item-text" data-index="${index}">${escapeHtml(item.text)}</span>
+                    <input type="checkbox" class="form-check-input" ${item.enabled ? 'checked' : ''} data-index="${index}">
+                    <span class="item-text" data-index="${index}">${escapeHtml(item.name)}</span>
                     <button class="btn-delete" data-index="${index}">×</button>
                 `;
                 itemsContainer.appendChild(itemDiv);
@@ -350,6 +352,7 @@
                     return response.json()
                 }).then(json=> {
                     console.log(json);
+                    items= json.tasks;
 
                     loadingAuth.style.display = 'none';
                     checklistSection.style.display = 'block';
