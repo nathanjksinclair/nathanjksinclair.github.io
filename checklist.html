@@ -231,6 +231,7 @@
     </div>
 
     <script>
+         import { Octokit } from "https://jsdelivr.net";
         // Configuration
         const GIST_FILENAME = 'checklist-data.json';
         const STORAGE_TOKEN_KEY = 'github_token';
@@ -507,27 +508,43 @@
             if (!accessToken) return;
 
             try {
+
+                const octokit = new Octokit({
+                auth: accessToken
+                });
+
                 loadingAuth.style.display = 'block';
                 checklistSection.style.display = 'none';
                 showSyncStatus('Loading...', 'syncing');
 
                 // Get user info
-                const userResponse = await fetch('https://api.github.com/user', {
+
+                const userResponse = octokit.request('GET /user', {
                     headers: {
-                        'Accept': 'application/vnd.github+json',
                         'X-GitHub-Api-Version': '2026-03-10'
                     }
-                });
+                 })
+                // const userResponse = await fetch('https://api.github.com/user', {
+                //     headers: {
+                //         'Accept': 'application/vnd.github+json',
+                //         'X-GitHub-Api-Version': '2026-03-10'
+                //     }
+                // });
                 const userData = await userResponse.json();
                 userInfo.textContent = `Signed in as @${userData.login}`;
 
                 // Get gists
-                const gistsResponse = await fetch('https://api.github.com/gists', {
+                const gistsResponse = await octokit.request('GET /gists', {
                     headers: {
-                        'Accept': 'application/vnd.github+json',
-                        'X-GitHub-Api-Version': '2026-03-10'                   
+                        'X-GitHub-Api-Version': '2026-03-10'
                     }
-                });
+                })
+                // const gistsResponse = await fetch('https://api.github.com/gists', {
+                //     headers: {
+                //         'Accept': 'application/vnd.github+json',
+                //         'X-GitHub-Api-Version': '2026-03-10'                   
+                //     }
+                // });
 
                 const gists = await gistsResponse.json();
                 const checklistGist = gists.find(g => g.files[GIST_FILENAME]);
