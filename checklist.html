@@ -341,25 +341,9 @@
 
             try {
 
-                const jsonResponse=  await fetch('https://nathanjksinclair.github.io/db.json')
-                const myDb = jsonResponse.json();
-                console.log(myDb);
-                if (checklistGist) {
-                    gistId = checklistGist.id;
-                    localStorage.setItem(STORAGE_GIST_KEY, gistId);
-
-                    // Load file content
-                    const fileUrl = checklistGist.files[GIST_FILENAME].raw_url;
-                    const fileResponse = await fetch(fileUrl);
-
-                    if (fileResponse.ok) {
-                        items = await fileResponse.json();
-                    } else {
-                        items = [];
-                    }
-                } else {
-                    items = [];
-                }
+                await fetch('https://nathanjksinclair.github.io/db.json').then((response)=> response.json()).then(json=> {
+                    console.log(json);
+                })
 
                 loadingAuth.style.display = 'none';
                 checklistSection.style.display = 'block';
