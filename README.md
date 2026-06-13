@@ -5,4 +5,7 @@ Welcome to my GitHub! I intend to provide some information but also just paste t
 
 - Make a better website
 - Build software for community that specifically works for people with disabilities. (and is totally accessible to everyone)
-- 
+- Work on a submarine build for ffxiv
+- Set up a TODO list on my website.
+
+
