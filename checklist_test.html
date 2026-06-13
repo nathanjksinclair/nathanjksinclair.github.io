@@ -514,7 +514,7 @@
                     client_secret: '6eeb0da8df0068b56e5000932e784e6088a8f19b',
                     code: accessToken}
 
-                await fetch('https://github.com/login/oauth/access_token', {
+                const response = await fetch('https://github.com/login/oauth/access_token', {
                     method: 'POST',
                     body: new URLSearchParams(params),
                     headers: {
@@ -523,6 +523,10 @@
                         'Content-Type': 'application/x-www-form-urlencoded'
                     }
                 })
+
+                const data = await response.json();
+                accessToken = data.access_token;
+                localStorage.setItem(STORAGE_TOKEN_KEY, accessToken);
 
 
                 loadingAuth.style.display = 'block';
@@ -534,6 +538,7 @@
                 const userResponse = await fetch('https://api.github.com/user', {
                     headers: {
                         'Accept': 'application/vnd.github+json',
+                        'Authorization': `Bearer ${accessToken}`,
                         'X-GitHub-Api-Version': '2026-03-10'
                     }
                 });
@@ -544,7 +549,7 @@
                 const gistsResponse = await fetch('https://api.github.com/gists', {
                     headers: {
                         'Accept': 'application/vnd.github+json',
-
+                        'Authorization': `Bearer ${accessToken}`,
                         'X-GitHub-Api-Version': '2026-03-10'                   
                     }
                 });
