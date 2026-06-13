@@ -509,8 +509,7 @@
 
             try {
 
-                await fetch('https://api.github.com/applications/'+clientId+'/token', {
-                    method: 'POST',
+                await fetch('https://api.github.com/octocat', {
 
                     headers: {
                         'Accept': 'application/vnd.github+json',
