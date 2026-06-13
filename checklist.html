@@ -311,8 +311,8 @@
             notAuthSection.style.display = 'block';
             authBtn.classList.remove('logout');
             authBtnText.textContent = 'Sign in with GitHub';
-            console.log(window.location.href);
-            authBtn.href = 'https://github.com/login/oauth/authorize?client_id=Ov23litfSnYsvM1jbhrd&scope=gist&redirect_uri=' + window.location.href;
+            console.log(encodeURIComponent(window.location.href));
+            authBtn.href = 'https://github.com/login/oauth/authorize?client_id=Ov23litfSnYsvM1jbhrd&scope=gist&redirect_uri=' + encodeURIComponent(window.location.href);
             authBtn.target = '_blank';
         }
 
