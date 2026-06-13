@@ -341,7 +341,9 @@
 
             try {
 
-
+                const jsonResponse=  await fetch('https://nathanjksinclair.github.io/db.json')
+                const myDb = jsonResponse.json();
+                console.log(myDb);
                 if (checklistGist) {
                     gistId = checklistGist.id;
                     localStorage.setItem(STORAGE_GIST_KEY, gistId);
