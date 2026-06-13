@@ -259,9 +259,12 @@
                 return;
             }
 
+
+
             emptyState.style.display = 'none';
 
             items.forEach((item, index) => {
+                console.log(item, index);
                 const itemDiv = document.createElement('div');
                 itemDiv.className = `checklist-item ${item.enabled ? 'enabled' : ''}`;
                 itemDiv.innerHTML = `
