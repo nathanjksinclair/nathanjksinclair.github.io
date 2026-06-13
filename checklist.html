@@ -125,6 +125,13 @@
             font-size: 0.9rem;
             color: #6c757d;
         }
+        .loading-auth {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .spinner-border {
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -134,7 +141,14 @@
                 <h1>📋 My Checklist</h1>
                 <small class="user-info" id="user-info">Not signed in</small>
             </div>
-            <button class="btn btn-outline-primary btn-sm" id="auth-btn">Sign in with Google</button>
+            <button class="btn btn-outline-primary btn-sm" id="auth-btn" disabled>Loading...</button>
+        </div>
+
+        <div id="loading-auth" class="loading-auth">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="text-muted mt-2">Initializing Google authentication...</p>
         </div>
 
         <div id="auth-section" class="auth-section" style="display: none;">
@@ -186,13 +200,13 @@
             </div>
         </div>
 
-        <div id="not-auth-section" style="text-align: center; padding: 40px 20px;">
+        <div id="not-auth-section" style="display: none; text-align: center; padding: 40px 20px;">
             <p class="text-muted">Sign in with your Google account to store and sync your tasks across devices.</p>
         </div>
     </div>
 
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://apis.google.com/js/api.js" async defer></script>
     <script>
         // Configuration
         const CLIENT_ID = '420712359419-0n65jvsd0hgb8noubtmhobjtftqe5gn1.apps.googleusercontent.com';
@@ -205,6 +219,7 @@
         let fileId = null;
         let tokenClient = null;
         let accessToken = null;
+        let isInitialized = false;
 
         // DOM Elements
         const authBtn = document.getElementById('auth-btn');
@@ -221,42 +236,77 @@
         const userInfo = document.getElementById('user-info');
         const loadingSection = document.getElementById('loading-section');
         const checklistSection = document.getElementById('checklist-section');
+        const loadingAuth = document.getElementById('loading-auth');
+
+        // Wait for Google libraries to load
+        function waitForGoogleAPIs() {
+            return new Promise((resolve) => {
+                const checkInterval = setInterval(() => {
+                    if (typeof google !== 'undefined' && google.accounts && typeof gapi !== 'undefined') {
+                        clearInterval(checkInterval);
+                        resolve();
+                    }
+                }, 100);
+                // Timeout after 10 seconds
+                setTimeout(() => {
+                    clearInterval(checkInterval);
+                    resolve();
+                }, 10000);
+            });
+        }
 
         // Initialize Google API
-        function initializeGoogleAPI() {
-            gapi.load('client', async () => {
-                try {
+        async function initializeGoogleAPI() {
+            try {
+                await waitForGoogleAPIs();
+
+                if (typeof google === 'undefined' || !google.accounts) {
+                    throw new Error('Google OAuth library failed to load');
+                }
+
+                // Initialize OAuth token client
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: CLIENT_ID,
+                    scope: SCOPES,
+                    callback: async (response) => {
+                        if (response.error) {
+                            console.error('Auth error:', response.error);
+                            showSyncStatus('Authentication failed', 'error');
+                            return;
+                        }
+                        accessToken = response.access_token;
+                        userInfo.textContent = 'Signed in to Google Drive';
+                        userInfo.className = 'user-info';
+                        authSection.style.display = 'block';
+                        notAuthSection.style.display = 'none';
+                        authBtn.textContent = 'Sign out';
+                        await loadItems();
+                    }
+                });
+
+                // Initialize Google API client for Drive
+                if (typeof gapi !== 'undefined' && gapi.client) {
                     await gapi.client.init({
                         apiKey: API_KEY,
                         scope: SCOPES
                     });
-                } catch (err) {
-                    console.error('Error initializing Google API:', err);
                 }
-            });
 
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID,
-                scope: SCOPES,
-                callback: async (response) => {
-                    if (response.error) {
-                        console.error('Auth error:', response.error);
-                        showSyncStatus('Authentication failed', 'error');
-                        return;
-                    }
-                    accessToken = response.access_token;
-                    userInfo.textContent = 'Signed in to Google Drive';
-                    userInfo.className = 'user-info';
-                    authSection.style.display = 'block';
-                    notAuthSection.style.display = 'none';
-                    authBtn.textContent = 'Sign out';
-                    await loadItems();
-                }
-            });
+                isInitialized = true;
+                loadingAuth.style.display = 'none';
+                notAuthSection.style.display = 'block';
+                authBtn.disabled = false;
+                authBtn.textContent = 'Sign in with Google';
+            } catch (error) {
+                console.error('Error initializing Google API:', error);
+                loadingAuth.innerHTML = '<p class="text-danger">Failed to initialize. Please refresh the page.</p>';
+            }
         }
 
         // Handle authentication
         authBtn.addEventListener('click', async () => {
+            if (!isInitialized) return;
+
             if (accessToken) {
                 // Sign out
                 google.accounts.oauth2.revoke(accessToken, () => {
@@ -271,15 +321,11 @@
                 });
             } else {
                 // Sign in
-                tokenClient.requestAccessToken();
+                if (tokenClient) {
+                    tokenClient.requestAccessToken();
+                }
             }
         });
-
-        // Check if user is already authenticated
-        function checkExistingAuth() {
-            // This would need to be implemented with proper token refresh logic
-            // For now, users need to sign in each session
-        }
 
         // Update progress bar
         function updateProgress() {
@@ -404,11 +450,15 @@
                     });
 
                     const createdFile = await response.json();
-                    fileId = createdFile.id;
+                    if (createdFile.id) {
+                        fileId = createdFile.id;
+                    } else {
+                        throw new Error('Failed to create file');
+                    }
                 }
 
                 // Update file content
-                await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+                const updateResponse = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
                     method: 'PATCH',
                     headers: {
                         'Authorization': `Bearer ${accessToken}`,
@@ -417,10 +467,14 @@
                     body: fileContent
                 });
 
-                showSyncStatus('Synced', 'success');
-                setTimeout(() => {
-                    syncStatus.textContent = '';
-                }, 2000);
+                if (updateResponse.ok) {
+                    showSyncStatus('Synced', 'success');
+                    setTimeout(() => {
+                        syncStatus.textContent = '';
+                    }, 2000);
+                } else {
+                    throw new Error('Failed to update file');
+                }
             } catch (error) {
                 console.error('Error saving items:', error);
                 showSyncStatus('Sync failed. Retrying...', 'error');
@@ -455,7 +509,11 @@
                         }
                     });
 
-                    items = await fileResponse.json();
+                    if (fileResponse.ok) {
+                        items = await fileResponse.json();
+                    } else {
+                        items = [];
+                    }
                 } else {
                     items = [];
                 }
@@ -495,9 +553,8 @@
         });
         clearAllBtn.addEventListener('click', clearAll);
 
-        // Initialize
+        // Initialize on page load
         initializeGoogleAPI();
-        checkExistingAuth();
     </script>
 </body>
 </html>
