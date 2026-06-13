@@ -2,6 +2,46 @@
     "tasks": [
         {
             "name": "Add a checklist to my web page",
+            "enabled": true
+        },
+        {
+            "name": "Put a database behind it",
+            "enabled": false
+        },
+        {
+            "name": "Gear LUGN submarines",
+            "enabled": false
+        },
+        {
+            "name": "Learn how to use GitHub Auth on a website",
+            "enabled": false
+        },
+        {
+            "name": "Create a community for like-minded people and watch my community grow and thrive",
+            "enabled": false
+        },
+        {
+            "name": "Organize viera events on FF",
+            "enabled": false
+        },
+        {
+            "name": "Keep up with C++",
+            "enabled": false
+        },
+        {
+            "name": "Keep up with Python",
+            "enabled": false
+        },
+        {
+            "name": "Keep up with Swift and Kotlin",
+            "enabled": false
+        },
+        {
+            "name": "Finish my Psalms essay",
+            "enabled": false
+        },
+        {
+            "name": "Achieve well at Hebrew",
             "enabled": false
         }
     ]
