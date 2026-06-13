@@ -519,7 +519,10 @@
 
                 // Get user info
 
-                 const { data: authenticatedUser } = await octokit.request("GET /user");
+                const { data: authenticatedUser } = await octokit.request("GET /user",{
+                    headers: {
+                        'X-GitHub-Api-Version': '2026-03-10'
+                }});
                 console.log(`Authenticated as: ${authenticatedUser.login}`);
                 // const userResponse = await fetch('https://api.github.com/user', {
                 //     headers: {
