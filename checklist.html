@@ -519,19 +519,15 @@
 
                 // Get user info
 
-                const userResponse = octokit.request('GET /user', {
-                    headers: {
-                        'X-GitHub-Api-Version': '2026-03-10'
-                    }
-                 })
+                 const { data: authenticatedUser } = await octokit.request("GET /user");
+                console.log(`Authenticated as: ${authenticatedUser.login}`);
                 // const userResponse = await fetch('https://api.github.com/user', {
                 //     headers: {
                 //         'Accept': 'application/vnd.github+json',
                 //         'X-GitHub-Api-Version': '2026-03-10'
                 //     }
                 // });
-                const userData = await userResponse.json();
-                userInfo.textContent = `Signed in as @${userData.login}`;
+                userInfo.textContent = `Signed in as @${authenticatedUser.login}`;
 
                 // Get gists
                 const gistsResponse = await octokit.request('GET /gists', {
