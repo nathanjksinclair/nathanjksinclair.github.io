@@ -264,14 +264,18 @@
                     throw new Error('Google OAuth library failed to load');
                 }
 
-                // Initialize OAuth token client
+                // Get the current origin
+                const origin = window.location.origin;
+
+                // Initialize OAuth token client with proper configuration
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: CLIENT_ID,
                     scope: SCOPES,
+                    redirect_uri: origin + window.location.pathname,
                     callback: async (response) => {
                         if (response.error) {
                             console.error('Auth error:', response.error);
-                            showSyncStatus('Authentication failed', 'error');
+                            showSyncStatus('Authentication failed: ' + response.error, 'error');
                             return;
                         }
                         accessToken = response.access_token;
@@ -299,7 +303,7 @@
                 authBtn.textContent = 'Sign in with Google';
             } catch (error) {
                 console.error('Error initializing Google API:', error);
-                loadingAuth.innerHTML = '<p class="text-danger">Failed to initialize. Please refresh the page.</p>';
+                loadingAuth.innerHTML = '<p class="text-danger"><strong>Error:</strong> ' + error.message + '</p><p class="text-muted small">Try refreshing the page or checking your credentials in Google Cloud Console.</p>';
             }
         }
 
@@ -322,7 +326,7 @@
             } else {
                 // Sign in
                 if (tokenClient) {
-                    tokenClient.requestAccessToken();
+                    tokenClient.requestAccessToken({ prompt: 'consent' });
                 }
             }
         });
@@ -453,7 +457,7 @@
                     if (createdFile.id) {
                         fileId = createdFile.id;
                     } else {
-                        throw new Error('Failed to create file');
+                        throw new Error('Failed to create file: ' + JSON.stringify(createdFile));
                     }
                 }
 
@@ -473,7 +477,7 @@
                         syncStatus.textContent = '';
                     }, 2000);
                 } else {
-                    throw new Error('Failed to update file');
+                    throw new Error('Failed to update file: ' + updateResponse.status);
                 }
             } catch (error) {
                 console.error('Error saving items:', error);
