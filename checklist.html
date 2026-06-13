@@ -341,7 +341,7 @@
 
             try {
 
-                await fetch('https://nathanjksinclair.github.io/db.json').then((response => {
+                await fetch('https://nathanjksinclair.github.io/db.json').then(response => {
                     if (!response.ok) {
                         throw new Error("Http error"+ response.status)
                     }
@@ -356,6 +356,8 @@
                     setTimeout(() => {
                         syncStatus.textContent = '';
                     }, 2000);
+                }).catch(function() {
+
                 })
 
                 
