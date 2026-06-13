@@ -261,7 +261,7 @@
         // Check for OAuth callback
         function handleOAuthCallback() {
             const params = new URLSearchParams(window.location.hash.substring(1));
-            const token = params.get('access_token');
+            const token = params.get('code');
 
             if (token) {
                 accessToken = token;
