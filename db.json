@@ -42,7 +42,7 @@
         },
         {
             "name": "Achieve well at Hebrew",
-            "enabled": false
+            "enabled": true
         },
         {
             "name": "Set up rust desk on laptop",
