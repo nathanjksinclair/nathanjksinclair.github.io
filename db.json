@@ -46,7 +46,7 @@
         },
         {
             "name": "Set up rust desk on laptop",
-            "enabled": false
+            "enabled": true
         }
     ]
 
