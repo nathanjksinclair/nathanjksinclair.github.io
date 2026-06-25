@@ -43,6 +43,10 @@
         {
             "name": "Achieve well at Hebrew",
             "enabled": false
+        },
+        {
+            "name": "Set up rust desk on laptop",
+            "enabled": false
         }
     ]
 
