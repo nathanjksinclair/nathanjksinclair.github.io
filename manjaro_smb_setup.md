@@ -146,6 +146,95 @@ Example from Windows:
 
 Enter the Samba username and password when prompted.
 
+## 9. Host Bare Git Repositories on the Server
+
+If you want the Manjaro machine to act as a Git host, create a dedicated folder for bare repositories on the server itself. Other computers should access those repositories with `git clone`, usually over SSH.
+
+Bare repositories do not contain a working copy. They are meant to be the central server-side copy that clients clone from and push to.
+
+### Create a Repository Folder
+
+```bash
+sudo mkdir -p /srv/git
+sudo chown -R yourusername:users /srv/git
+sudo chmod -R 2775 /srv/git
+```
+
+If you want the repository folder to be owned by a service account instead of your personal account, use that user and group consistently for all repo operations.
+
+### Create or Clone a Bare Repository
+
+If you want to mirror an existing GitHub repository into the server folder, use a bare clone:
+
+```bash
+git clone --bare https://github.com/owner/example-project.git /srv/git/example-project.git
+```
+
+You can repeat this for each project you want to host on the server.
+
+### Periodically Fetch Updates From GitHub
+
+If the server copy should stay in sync with GitHub, run `git fetch` inside each bare repository. A bare clone from GitHub already has a remote named `origin`, so it can be updated with:
+
+```bash
+cd /srv/git/example-project.git
+git fetch origin --prune --tags
+```
+
+If you created the repository first and added GitHub later, add the remote once:
+
+```bash
+cd /srv/git/example-project.git
+git remote add github https://github.com/owner/example-project.git
+git fetch github --prune --tags
+```
+
+To update every bare repository on a schedule, use a small script such as:
+
+```bash
+#!/bin/bash
+for repo in /srv/git/*.git; do
+    [ -d "$repo" ] || continue
+    git -C "$repo" fetch origin --prune --tags
+done
+```
+
+Save it as something like `/usr/local/bin/update-git-mirrors.sh`, make it executable, and run it from `cron` or a systemd timer if you want the fetch to happen automatically.
+
+### Enable SSH Access
+
+Install and start the SSH server so other machines can reach the repository folder:
+
+```bash
+sudo pacman -S openssh
+sudo systemctl enable --now sshd
+```
+
+If you use a firewall, allow SSH traffic on the local network:
+
+```bash
+sudo ufw allow ssh
+```
+
+or:
+
+```bash
+sudo firewall-cmd --permanent --add-service=ssh
+sudo firewall-cmd --reload
+```
+
+### Clone From Another Computer
+
+From another Linux machine, clone the repository with an SSH path:
+
+```bash
+git clone yourusername@manjaro-hostname:/srv/git/example-project.git
+```
+
+If SSH key authentication is set up, the clone can proceed without prompting for a password.
+
+After cloning, work in your local repository and push changes back to the server with normal Git commands.
+
 ## Troubleshooting
 
 ### The Share Does Not Appear
@@ -165,6 +254,14 @@ Enter the Samba username and password when prompted.
 - Confirm `guest ok = yes` is present in the share definition.
 - Check that the folder permissions allow the guest mapping user to read or write.
 - Make sure client-side security settings are not blocking guest access.
+
+### Git Operations Fail Over the Network
+
+- Confirm the repository is a bare repository created with `git init --bare`.
+- Make sure the user that is pushing has write access to the repository folder and its files.
+- Confirm the SSH service is running and port 22 is allowed through the firewall.
+- If you cloned from GitHub into the server with `git clone --bare`, verify the remote URL and repository path before pushing from clients.
+- If performance is poor, keep the repository on local disk and use SSH for Git transport instead of mounting the folder over SMB.
 
 ## Security Notes
 
